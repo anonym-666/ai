@@ -62,6 +62,7 @@
             border: 2px solid rgba(102, 126, 234, 0.2);
             border-radius: 20px;
             padding: 32px;
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
@@ -137,7 +138,7 @@
 
         .controls-grid {
             display: grid;
-            grid-template-columns: 1fr auto;
+            grid-template-columns: 1fr 1fr;
             gap: 20px;
             align-items: end;
         }
@@ -202,7 +203,7 @@
         }
 
         .preview {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.9));
+            background: linear-gradient(135deg, #f7fafc 0%, #e2e8f0 100%);
             border: 2px solid #e2e8f0;
             border-radius: 16px;
             padding: 32px;
@@ -215,19 +216,19 @@
         }
 
         .output-code {
-            background: linear-gradient(135deg, #2d3748, #4a5568);
-            border: 2px solid #718096;
+            background: #fff; /* Set to white for readability */
+            border: 2px solid #2d3748;
             border-radius: 16px;
             padding: 24px;
             font-family: inherit;
             white-space: pre-wrap;
             word-break: break-all;
-            color: #e2e8f0;
             max-height: 220px;
             overflow-y: auto;
             font-size: 14px;
             line-height: 1.6;
             box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
+            color: #222; /* Set text color to dark for contrast */
         }
 
         .copy-btn {
@@ -343,12 +344,14 @@
                 font-size: 2.5rem;
             }
         }
+        .font-style-toggle {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎮 Puzzles & Chaos Text Formatter</h1>
-        
+        <h1>🎮 Puzzles &amp; Chaos Text Formatter</h1>
         <div class="main-grid">
             <div class="section">
                 <h2>📝 Text Input</h2>
@@ -356,17 +359,17 @@
                     <label for="inputText">Enter your text:</label>
                     <textarea id="inputText" placeholder="Type your message here..."></textarea>
                 </div>
-                
                 <div class="controls-grid">
                     <div class="input-group">
                         <label for="textColor">Text Color:</label>
                         <input type="color" id="textColor" value="#00FF00">
                     </div>
                 </div>
-                
                 <div class="input-group">
-                    <label>Font Style:</label>
-                    <div class="font-selector" id="fontSelector">
+                    <label style="cursor:pointer;" onclick="toggleFontSelector()">
+                        Font Style <span id="fontSelectorArrow">▼</span>
+                    </label>
+                    <div class="font-selector" id="fontSelector" style="display:none;">
                         <div class="font-btn active" data-font="normal">Normal</div>
                         <div class="font-btn" data-font="bold">𝐁𝐨𝐥𝐝</div>
                         <div class="font-btn" data-font="italic">𝘐𝘵𝘢𝘭𝘪𝘤</div>
@@ -375,14 +378,20 @@
                         <div class="font-btn" data-font="sansSerif">𝖲𝖺𝗇𝗌 𝖲𝖾𝗋𝗂𝖿</div>
                         <div class="font-btn" data-font="boldSansSerif">𝗕𝗼𝗹𝗱 𝗦𝗮𝗻𝘀</div>
                         <div class="font-btn" data-font="italicSansSerif">𝘚𝘢𝘯𝘴 𝘐𝘵𝘢𝘭𝘪𝘤</div>
-                        <div class="font-btn" data-font="boldItalicSansSerif">𝙱𝚘𝚕𝚕𝚕𝚍 𝙸𝚝𝚊𝚕𝚒𝚌 𝚂𝚊𝚗𝚜</div>
+                        <div class="font-btn" data-font="boldItalicSansSerif">𝙱𝚘𝚕𝚕𝚝 𝚂𝚊𝚗𝚜</div>
                         <div class="font-btn" data-font="doubleStruck">𝔻𝕠𝕦𝕓𝕝𝕖 𝕊𝕥𝕣𝕦𝕔𝕜</div>
                     </div>
                 </div>
                 
-                <div class="style-buttons">
-                    <button class="style-btn" onclick="clearText()">🗑️ Clear</button>
-                    <button class="style-btn" onclick="resetFonts()">🔄 Reset Fonts</button>
+                <div class="style-buttons" style="margin-top:20px;">
+                    <button class="style-btn" id="addToMessageBtn"
+                        style="font-size:18px;padding:18px 32px;background:linear-gradient(135deg,#48bb78,#38a169);font-weight:700;width:100%;box-shadow:0 6px 25px rgba(72,187,120,0.4);"
+                        onclick="addToMessage()">
+                        ➕ Add to Full Message
+                    </button>
+                    <button class="style-btn" onclick="insertLineBreak()" style="font-size:16px;">
+                        ↩️ Line Break
+                    </button>
                 </div>
             </div>
             
@@ -399,6 +408,15 @@
                 <button class="copy-btn" onclick="copyToClipboard()">📋 Copy Code to Clipboard</button>
             </div>
         </div>
+        
+        <h2>🧩 Full Message</h2>
+        <div class="preview" id="fullPreview">
+            Your full message will appear here...
+        </div>
+        <div class="output-code" id="fullOutputCode">
+            The code for your full message will appear here...
+        </div>
+        <button class="copy-btn" onclick="copyFullMessage()">📋 Copy Full Message Code</button>
         
         <div class="guide">
             <div class="guide-header" onclick="toggleGuide()">
@@ -464,21 +482,72 @@
         };
 
         let currentFont = 'normal';
+        let fullMessage = []; // Array of {text, font, color, isLineBreak}
+
+        // Toggle font list visibility
+        function toggleFontList() {
+            const fontSelector = document.getElementById('fontSelector');
+            const arrow = document.getElementById('fontListArrow');
+            if (fontSelector.style.display === 'none') {
+                fontSelector.style.display = 'flex';
+                arrow.textContent = '▲';
+            } else {
+                fontSelector.style.display = 'none';
+                arrow.textContent = '▼';
+            }
+        }
+
+        function toggleFontSelector() {
+            const fs = document.getElementById('fontSelector');
+            const arrow = document.getElementById('fontSelectorArrow');
+            if (fs.style.display === 'none' || fs.style.display === '') {
+                fs.style.display = 'flex';
+                arrow.textContent = '▲';
+            } else {
+                fs.style.display = 'none';
+                arrow.textContent = '▼';
+            }
+        }
 
         // Convert text to selected font style
         function convertToFont(text, fontType) {
             const offsets = unicodeFontOffsets[fontType] || unicodeFontOffsets.normal;
+            // For italic fonts, fallback to normal for unsupported lowercase letters
+            const italicMissing = fontType === 'italic' ? ['h', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 't', 'u', 'v', 'w', 'x', 'y', 'z'] : [];
+            const italicSansMissing = fontType === 'italicSansSerif' ? ['h', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 't', 'u', 'v', 'w', 'x', 'y', 'z'] : [];
             return Array.from(text).map(char => {
                 const code = char.codePointAt(0);
+                let result = char;
                 if (char >= 'A' && char <= 'Z') {
-                    return String.fromCodePoint(offsets.upper + (code - 65));
+                    const cp = offsets.upper + (code - 65);
+                    try {
+                        result = String.fromCodePoint(cp);
+                    } catch {
+                        result = char;
+                    }
                 } else if (char >= 'a' && char <= 'z') {
-                    return String.fromCodePoint(offsets.lower + (code - 97));
+                    // Fallback for missing italic/italicSansSerif letters
+                    if ((italicMissing.includes(char) && fontType === 'italic') ||
+                        (italicSansMissing.includes(char) && fontType === 'italicSansSerif')) {
+                        result = char;
+                    } else {
+                        const cp = offsets.lower + (code - 97);
+                        try {
+                            result = String.fromCodePoint(cp);
+                        } catch {
+                            result = char;
+                        }
+                    }
                 } else if (char >= '0' && char <= '9' && offsets.digit !== null) {
-                    return String.fromCodePoint(offsets.digit + (code - 48));
-                } else {
-                    return char;
+                    const cp = offsets.digit + (code - 48);
+                    try {
+                        result = String.fromCodePoint(cp);
+                    } catch {
+                        result = char;
+                    }
                 }
+                if (result === '\uFFFD') result = char;
+                return result;
             }).join('');
         }
 
@@ -521,7 +590,9 @@
 
         // Input text change listener
         document.getElementById('inputText').addEventListener('input', updateOutput);
+        // Ensure color picker updates on both input and change events
         document.getElementById('textColor').addEventListener('input', updateOutput);
+        document.getElementById('textColor').addEventListener('change', updateOutput);
 
         // Clear text function
         function clearText() {
@@ -581,10 +652,79 @@
             }
         }
 
+        // Ajoute le texte formaté au message complet
+        function addToMessage() {
+            const inputText = document.getElementById('inputText').value;
+            if (!inputText.trim()) return;
+            const textColor = document.getElementById('textColor').value;
+            fullMessage.push({
+                text: inputText,
+                font: currentFont,
+                color: textColor,
+                isLineBreak: false
+            });
+            document.getElementById('inputText').value = '';
+            // document.getElementById('textColor').value = '#FFFFFF'; // <-- Supprime ou commente cette ligne
+            updateOutput();
+            updateFullMessage();
+        }
+
+        // Ajoute un saut de ligne au message complet
+        function insertLineBreak() {
+            fullMessage.push({isLineBreak: true});
+            updateFullMessage();
+        }
+
+        // Met à jour l'aperçu et le code du message complet
+        function updateFullMessage() {
+            const fullPreview = document.getElementById('fullPreview');
+            const fullOutputCode = document.getElementById('fullOutputCode');
+            if (!fullMessage.length) {
+                fullPreview.textContent = 'Your full message will appear here...';
+                fullOutputCode.textContent = 'The code for your full message will appear here...';
+                return;
+            }
+            // Génère l'aperçu HTML et le code jeu
+            let html = '';
+            let code = '';
+            fullMessage.forEach(part => {
+                if (part.isLineBreak) {
+                    html += '<br>';
+                    code += '\n';
+                } else {
+                    const styled = convertToFont(part.text, part.font);
+                    html += `<span style="color:${part.color}">${styled}</span>`;
+                    code += `<color ${part.color}>${styled}</color>`;
+                }
+            });
+            fullPreview.innerHTML = html;
+            fullOutputCode.textContent = code;
+        }
+
+        // Copier le message complet
+        function copyFullMessage() {
+            const code = document.getElementById('fullOutputCode').textContent;
+            if (code && code !== 'The code for your full message will appear here...') {
+                navigator.clipboard.writeText(code).then(() => {
+                    const btn = document.querySelectorAll('.copy-btn')[1];
+                    const originalText = btn.textContent;
+                    btn.textContent = '✅ Copied!';
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                    }, 2000);
+                });
+            }
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             updateOutput();
         });
     </script>
+    <script>
+document.getElementById('textColor').addEventListener('input', function() {
+    console.log('Color input changed to:', this.value);
+});
+</script>
 </body>
 </html>
