@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzles & Chaos - Text Formatter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            color: #2d3748;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 24px;
+            padding: 40px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #f5576c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .section {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 20px;
+            padding: 32px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .section h2 {
+            color: #4a5568;
+            margin-bottom: 24px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            color: #2d3748;
+            font-family: inherit;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        input[type="color"] {
+            width: 80px;
+            height: 50px;
+            padding: 4px;
+            background: transparent;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        input[type="color"]:hover {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        textarea {
+            height: 140px;
+            resize: vertical;
+            font-family: 'Courier New', monospace;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 20px;
+            align-items: end;
+        }
+
+        .style-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .style-btn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .style-btn:hover {
+            background: linear-gradient(135deg, #5a67d8, #6b46c1);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .font-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .font-btn {
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
+        }
+
+        .font-btn:hover {
+            background: linear-gradient(135deg, #ed64a6, #e53e3e);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(240, 147, 251, 0.4);
+        }
+
+        .font-btn.active {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            box-shadow: 0 6px 25px rgba(79, 172, 254, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .preview {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.9));
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 32px;
+            min-height: 140px;
+            margin-bottom: 24px;
+            font-size: 20px;
+            line-height: 1.6;
+            font-family: inherit;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .output-code {
+            background: linear-gradient(135deg, #2d3748, #4a5568);
+            border: 2px solid #718096;
+            border-radius: 16px;
+            padding: 24px;
+            font-family: inherit;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: #e2e8f0;
+            max-height: 220px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.6;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .copy-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 16px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .copy-btn:hover {
+            background: linear-gradient(135deg, #38a169, #2f855a);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+        }
+
+        .guide {
+            margin-top: 40px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .guide-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 24px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .guide-header:hover {
+            background: linear-gradient(135deg, #5a67d8, #6b46c1);
+        }
+
+        .guide-content {
+            padding: 32px;
+            display: none;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .guide-content.active {
+            display: block;
+        }
+
+        .guide-section {
+            margin-bottom: 32px;
+            padding: 24px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-left: 4px solid #667eea;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .guide-section h3 {
+            color: #4a5568;
+            margin-bottom: 16px;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .guide-section code {
+            background: rgba(45, 55, 72, 0.1);
+            padding: 6px 12px;
+            border-radius: 8px;
+            color: #667eea;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .example {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 16px 0;
+            border-left: 4px solid #f093fb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .style-buttons {
+                flex-direction: column;
+            }
+
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .font-selector {
+                flex-wrap: wrap;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Puzzles & Chaos Text Formatter</h1>
+        
+        <div class="main-grid">
+            <div class="section">
+                <h2>📝 Text Input</h2>
+                <div class="input-group">
+                    <label for="inputText">Enter your text:</label>
+                    <textarea id="inputText" placeholder="Type your message here..."></textarea>
+                </div>
+                
+                <div class="controls-grid">
+                    <div class="input-group">
+                        <label for="textColor">Text Color:</label>
+                        <input type="color" id="textColor" value="#00FF00">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Font Style:</label>
+                    <div class="font-selector" id="fontSelector">
+                        <div class="font-btn active" data-font="normal">Normal</div>
+                        <div class="font-btn" data-font="bold">𝐁𝐨𝐥𝐝</div>
+                        <div class="font-btn" data-font="italic">𝘐𝘵𝘢𝘭𝘪𝘤</div>
+                        <div class="font-btn" data-font="boldItalic">𝑩𝒐𝒍𝒅 𝑰𝒕𝒂𝒍𝒊𝒄</div>
+                        <div class="font-btn" data-font="monospace">𝚖𝚘𝚗𝚘𝚜𝚙𝚊𝚌𝚎</div>
+                        <div class="font-btn" data-font="sansSerif">𝖲𝖺𝗇𝗌 𝖲𝖾𝗋𝗂𝖿</div>
+                        <div class="font-btn" data-font="boldSansSerif">𝗕𝗼𝗹𝗱 𝗦𝗮𝗻𝘀</div>
+                        <div class="font-btn" data-font="italicSansSerif">𝘚𝘢𝘯𝘴 𝘐𝘵𝘢𝘭𝘪𝘤</div>
+                        <div class="font-btn" data-font="boldItalicSansSerif">𝙱𝚘𝚕𝚕𝚕𝚍 𝙸𝚝𝚊𝚕𝚒𝚌 𝚂𝚊𝚗𝚜</div>
+                        <div class="font-btn" data-font="doubleStruck">𝔻𝕠𝕦𝕓𝕝𝕖 𝕊𝕥𝕣𝕦𝕔𝕜</div>
+                    </div>
+                </div>
+                
+                <div class="style-buttons">
+                    <button class="style-btn" onclick="clearText()">🗑️ Clear</button>
+                    <button class="style-btn" onclick="resetFonts()">🔄 Reset Fonts</button>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>👁️ Preview</h2>
+                <div class="preview" id="preview">
+                    Your formatted text will appear here...
+                </div>
+                
+                <h2>📋 Game Code</h2>
+                <div class="output-code" id="outputCode">
+                    Generated code will appear here...
+                </div>
+                <button class="copy-btn" onclick="copyToClipboard()">📋 Copy Code to Clipboard</button>
+            </div>
+        </div>
+        
+        <div class="guide">
+            <div class="guide-header" onclick="toggleGuide()">
+                <span>📚 FORMATTING GUIDE & FONT SAMPLES</span>
+                <span id="guideArrow">▼</span>
+            </div>
+            <div class="guide-content" id="guideContent">
+                <div class="guide-section">
+                    <h3>🎨 COLOR FORMATTING</h3>
+                    <p>Use the color tag with hex codes:</p>
+                    <code>&lt;color #RRGGBB&gt;Your text&lt;/color&gt;</code>
+                    <div class="example">
+                        <strong>Example:</strong><br>
+                        <code>&lt;color #00FF00&gt;Important message&lt;/color&gt;</code>
+                    </div>
+                </div>
+                
+                <div class="guide-section">
+                    <h3>🔤 FONT STYLES</h3>
+                    <p>Available Unicode font styles:</p>
+                    <div class="example">
+                        <strong>Normal:</strong> Hello World<br>
+                        <strong>Bold:</strong> 𝐇𝐞𝐥𝐥𝐨 𝐖𝐨𝐫𝐥𝐝<br>
+                        <strong>Italic:</strong> 𝘏𝘦𝘭𝘭𝘰 𝘞𝘰𝘳𝘭𝘥<br>
+                        <strong>Bold Italic:</strong> 𝑯𝒆𝒍𝒍𝒐 𝑾𝒐𝒓𝒍𝒅<br>
+                        <strong>Script:</strong> 𝒽𝑒𝓁𝓁𝑜 𝓌𝑜𝓇𝓁𝒹<br>
+                        <strong>Bold Script:</strong> 𝓱𝓮𝓵𝓵𝓸 𝔀𝓸𝓻𝓵𝓭<br>
+                        <strong>Fraktur:</strong> 𝔥𝔢𝔩𝔩𝔬 𝔴𝔬𝔯𝔩𝔡<br>
+                        <strong>Bold Fraktur:</strong> 𝖍𝖊𝖑𝖑𝖔 𝖜𝖔𝖗𝖑𝖉<br>
+                        <strong>Monospace:</strong> 𝚑𝚎𝚕𝚕𝚘 𝚠𝚘𝚛𝚕𝚍<br>
+                        <strong>Sans Serif:</strong> 𝗁𝖾𝗅𝗅𝗈 𝗐𝗈𝗋𝗅𝖽<br>
+                        <strong>Bold Sans:</strong> 𝗵𝗲𝗹𝗹𝗼 𝘄𝗼𝗿𝗹𝗱<br>
+                        <strong>Italic Sans:</strong> 𝘩𝘦𝘭𝘭𝘰 𝘸𝘰𝘳𝘭𝘥
+                    </div>
+                </div>
+                
+                <div class="guide-section">
+                    <h3>✨ TIPS FOR BEST RESULTS</h3>
+                    <p>• Choose colors that contrast well with your game's background</p>
+                    <p>• Test different font styles to see which ones look best</p>
+                    <p>• Keep your messages readable and not too long</p>
+                    <p>• Unicode fonts work across most modern platforms</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Helper to build a mapping from normal to styled characters
+        
+        // Unicode font code point bases
+        const unicodeFontOffsets = {
+            normal:        { upper: 0x41,    lower: 0x61,    digit: 0x30 }, // ASCII
+            bold:          { upper: 0x1D400, lower: 0x1D41A, digit: 0x1D7CE },
+            italic:        { upper: 0x1D434, lower: 0x1D44E, digit: null },
+            boldItalic:    { upper: 0x1D468, lower: 0x1D482, digit: 0x1D7CE },
+            monospace:     { upper: 0x1D670, lower: 0x1D68A, digit: 0x1D7F6 },
+            sansSerif:     { upper: 0x1D5A0, lower: 0x1D5BA, digit: 0x1D7E2 },
+            boldSansSerif: { upper: 0x1D5D4, lower: 0x1D5EE, digit: 0x1D7EC },
+            italicSansSerif: { upper: 0x1D608, lower: 0x1D622, digit: null },
+            boldItalicSansSerif: { upper: 0x1D63C, lower: 0x1D656, digit: 0x1D7F6 },
+            doubleStruck:  { upper: 0x1D538, lower: 0x1D552, digit: 0x1D7D8 }
+        };
+
+        let currentFont = 'normal';
+
+        // Convert text to selected font style
+        function convertToFont(text, fontType) {
+            const offsets = unicodeFontOffsets[fontType] || unicodeFontOffsets.normal;
+            return Array.from(text).map(char => {
+                const code = char.codePointAt(0);
+                if (char >= 'A' && char <= 'Z') {
+                    return String.fromCodePoint(offsets.upper + (code - 65));
+                } else if (char >= 'a' && char <= 'z') {
+                    return String.fromCodePoint(offsets.lower + (code - 97));
+                } else if (char >= '0' && char <= '9' && offsets.digit !== null) {
+                    return String.fromCodePoint(offsets.digit + (code - 48));
+                } else {
+                    return char;
+                }
+            }).join('');
+        }
+
+        // Update preview and output
+        function updateOutput() {
+            const inputText = document.getElementById('inputText').value;
+            const textColor = document.getElementById('textColor').value;
+            const preview = document.getElementById('preview');
+            const outputCode = document.getElementById('outputCode');
+            
+            if (!inputText.trim()) {
+                preview.textContent = 'Your formatted text will appear here...';
+                outputCode.textContent = 'Generated code will appear here...';
+                return;
+            }
+            
+            const convertedText = convertToFont(inputText, currentFont);
+            const colorCode = `<color ${textColor}>${convertedText}</color>`;
+            
+            preview.innerHTML = `<span style="color: ${textColor}">${convertedText}</span>`;
+            outputCode.textContent = colorCode;
+        }
+
+        // Font selector functionality
+        document.getElementById('fontSelector').addEventListener('click', function(e) {
+            if (e.target.classList.contains('font-btn')) {
+                // Remove active class from all buttons
+                document.querySelectorAll('.font-btn').forEach(btn => btn.classList.remove('active'));
+                
+                // Add active class to clicked button
+                e.target.classList.add('active');
+                
+                // Update current font
+                currentFont = e.target.dataset.font;
+                
+                // Update output
+                updateOutput();
+            }
+        });
+
+        // Input text change listener
+        document.getElementById('inputText').addEventListener('input', updateOutput);
+        document.getElementById('textColor').addEventListener('input', updateOutput);
+
+        // Clear text function
+        function clearText() {
+            document.getElementById('inputText').value = '';
+            updateOutput();
+        }
+
+        // Reset fonts function
+        function resetFonts() {
+            document.querySelectorAll('.font-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.font-btn[data-font="normal"]').classList.add('active');
+            currentFont = 'normal';
+            updateOutput();
+        }
+
+        // Copy to clipboard function
+        function copyToClipboard() {
+            const outputCode = document.getElementById('outputCode').textContent;
+            if (outputCode && outputCode !== 'Generated code will appear here...') {
+                navigator.clipboard.writeText(outputCode).then(() => {
+                    const btn = document.querySelector('.copy-btn');
+                    const originalText = btn.textContent;
+                    btn.textContent = '✅ Copied!';
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                    }, 2000);
+                }).catch(() => {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = outputCode;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    const btn = document.querySelector('.copy-btn');
+                    const originalText = btn.textContent;
+                    btn.textContent = '✅ Copied!';
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                    }, 2000);
+                });
+            }
+        }
+
+        // Toggle guide function
+        function toggleGuide() {
+            const guideContent = document.getElementById('guideContent');
+            const guideArrow = document.getElementById('guideArrow');
+            
+            if (guideContent.classList.contains('active')) {
+                guideContent.classList.remove('active');
+                guideArrow.textContent = '▼';
+            } else {
+                guideContent.classList.add('active');
+                guideArrow.textContent = '▲';
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateOutput();
+        });
+    </script>
+</body>
+</html>
